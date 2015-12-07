@@ -3,6 +3,8 @@
 
 namespace CyberZend\SocialLogin\SocialNetwork\Google;
 
+use CyberZend\SocialLogin\SocialNetwork\SocialUserInterface;
+
 class GoogleUser extends \Magento\Framework\DataObject implements SocialUserInterface
 {
     /**

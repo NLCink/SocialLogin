@@ -4,14 +4,13 @@
 namespace CyberZend\SocialLogin\SocialNetwork\Twitter;
 
 use CyberZend\SocialLogin\SocialNetwork\AbstractSocialLogin;
-use CyberZend\SocialLogin\SocialNetwork\SocialLoginInterface;
 
-class TwitterLogin extends AbstractSocialLogin implements SocialLoginInterface
+class TwitterLogin extends AbstractSocialLogin
 {
     /**
      * {@inheritdoc}
      */
-    protected $_userDataClass = 'CyberZend\\SocialLogin\\SocialNetwork\\TwitterUser';
+    protected $_userDataClass = 'CyberZend\\SocialLogin\\SocialNetwork\\Twitter\\TwitterUser';
 
     /**
      * {@inheritdoc}
@@ -34,9 +33,8 @@ class TwitterLogin extends AbstractSocialLogin implements SocialLoginInterface
      */
     public function getLoginUrl()
     {
-//        $token = $this->_socialService->requestRequestToken();
-        return '';
-//        return $this->_socialService->getAuthorizationUri(['oauth_token' => $token->getRequestToken()]);
+        $token = $this->_socialService->requestRequestToken();
+        return $this->_socialService->getAuthorizationUri(['oauth_token' => $token->getRequestToken()]);
     }
 
     /**
@@ -55,8 +53,12 @@ class TwitterLogin extends AbstractSocialLogin implements SocialLoginInterface
         );
 
         $userData = $this->_jsonHelper->jsonDecode(
-            $this->_socialService->request('https://www.googleapis.com/oauth2/v1/userinfo')
+            $this->_socialService->request('account/verify_credentials.json')
         );
-        return $this->createSocialUserExtracter($userData);
+
+        /** @var \CyberZend\SocialLogin\SocialNetwork\SocialUserInterface $socialUserExtracter */
+        $socialUserExtracter = $this->createSocialUserExtracter($userData);
+
+        return $this->_processSocialUserExtracter($socialUserExtracter);
     }
 }

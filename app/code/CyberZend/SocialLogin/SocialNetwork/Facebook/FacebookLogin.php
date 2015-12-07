@@ -2,12 +2,11 @@
 namespace CyberZend\SocialLogin\SocialNetwork\Facebook;
 
 use CyberZend\SocialLogin\SocialNetwork\AbstractSocialLogin;
-use CyberZend\SocialLogin\SocialNetwork\SocialLoginInterface;
 use OAuth\OAuth2\Service\Facebook;
 
-class FacebookLogin extends AbstractSocialLogin implements SocialLoginInterface
+class FacebookLogin extends AbstractSocialLogin
 {
-    protected $_userDataClass = 'CyberZend\\SocialLogin\\SocialNetwork\\FacebookUser';
+    protected $_userDataClass = 'CyberZend\\SocialLogin\\SocialNetwork\\Facebook\\FacebookUser';
 
     /**
      * @var array
@@ -52,6 +51,10 @@ class FacebookLogin extends AbstractSocialLogin implements SocialLoginInterface
         );
 
         $userData = $this->_jsonHelper->jsonDecode($this->_socialService->request('/me'));
-        return $this->createSocialUserExtracter($userData);
+
+        /** @var \CyberZend\SocialLogin\SocialNetwork\SocialUserInterface $socialUserExtracter */
+        $socialUserExtracter = $this->createSocialUserExtracter($userData);
+
+        return $this->_processSocialUserExtracter($socialUserExtracter);
     }
 }

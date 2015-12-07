@@ -1,6 +1,8 @@
 <?php
 namespace CyberZend\SocialLogin\SocialNetwork\Twitter;
 
+use CyberZend\SocialLogin\SocialNetwork\SocialUserInterface;
+
 class TwitterUser extends \Magento\Framework\DataObject implements SocialUserInterface
 {
     /**
@@ -58,7 +60,7 @@ class TwitterUser extends \Magento\Framework\DataObject implements SocialUserInt
      */
     public function getUsername()
     {
-        return $this->hasData('screen_name');
+        return $this->getData('screen_name');
     }
 
     /**
@@ -66,7 +68,7 @@ class TwitterUser extends \Magento\Framework\DataObject implements SocialUserInt
      */
     public function getEmailAddress()
     {
-        return null;
+        return $this->getUsername() . '@twitter.com';
     }
 
     /**

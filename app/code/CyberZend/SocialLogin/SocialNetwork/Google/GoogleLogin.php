@@ -2,14 +2,13 @@
 namespace CyberZend\SocialLogin\SocialNetwork\Google;
 
 use CyberZend\SocialLogin\SocialNetwork\AbstractSocialLogin;
-use CyberZend\SocialLogin\SocialNetwork\SocialLoginInterface;
 
-class GoogleLogin extends AbstractSocialLogin implements SocialLoginInterface
+class GoogleLogin extends AbstractSocialLogin
 {
     /**
      * {@inheritdoc}
      */
-    protected $_userDataClass = 'CyberZend\\SocialLogin\\SocialNetwork\\GoogleUser';
+    protected $_userDataClass = 'CyberZend\\SocialLogin\\SocialNetwork\\Google\\GoogleUser';
 
     /**
      * @var array
@@ -55,6 +54,10 @@ class GoogleLogin extends AbstractSocialLogin implements SocialLoginInterface
         $userData = $this->_jsonHelper->jsonDecode(
             $this->_socialService->request('https://www.googleapis.com/oauth2/v1/userinfo')
         );
-        return $this->createSocialUserExtracter($userData);
+
+        /** @var \CyberZend\SocialLogin\SocialNetwork\SocialUserInterface $socialUserExtracter */
+        $socialUserExtracter = $this->createSocialUserExtracter($userData);
+
+        return $this->_processSocialUserExtracter($socialUserExtracter);
     }
 }

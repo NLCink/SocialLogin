@@ -1,0 +1,22 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <cyberzend_sociallogin>
+            <general>
+                <enable>1</enable>
+            </general>
+            <facebook>
+                <enable>1</enable>
+                <sort_order>1</sort_order>
+            </facebook>
+            <twitter>
+                <enable>1</enable>
+                <sort_order>2</sort_order>
+            </twitter>
+            <google>
+                <enable>1</enable>
+                <sort_order>3</sort_order>
+            </google>
+        </cyberzend_sociallogin>
+    </default>
+</config>

@@ -5,6 +5,11 @@ namespace CyberZend\SocialLogin\SocialNetwork;
 abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
 {
     /**
+     * param name provider code for call back url
+     */
+    const PARAM_NAME_PROVIDER_CODE = 'provider_code';
+
+    /**
      * @var string
      */
     protected $_sectionConfig = 'cyberzend_sociallogin';
@@ -13,6 +18,16 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
      * @var \Magento\Framework\ObjectManagerInterface
      */
     protected $_objectManager;
+
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    protected $_storeManager;
+
+    /**
+     * @var \Magento\Customer\Model\Session
+     */
+    protected $_customerSession;
 
     /**
      * Request object
@@ -95,6 +110,16 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
     protected $_urlBuilder;
 
     /**
+     * @var \Magento\Customer\Model\CustomerFactory
+     */
+    protected $_customerFactory;
+
+    /**
+     * @var \CyberZend\SocialLogin\Controller\Result\JsRedirectLogin
+     */
+    protected $_jsRedirectLoginFactory;
+
+    /**
      * AbstractSocialLogin constructor.
      *
      * @param Context $context
@@ -106,6 +131,8 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
     ) {
         parent::__construct($data);
         $this->_objectManager = $context->getObjectManager();
+        $this->_storeManager = $context->getStoreManager();
+        $this->_customerSession = $context->getCustomerSession();
         $this->_socialServiceFactory = $context->getOauthServiceFactory();
         $this->_storageSessionFactory = $context->getStorageSessionFactory();
         $this->_credentialsFactory = $context->getCredentialsFactory();
@@ -113,6 +140,8 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
         $this->_scopeConfig = $context->getScopeConfig();
         $this->_request = $context->getRequest();
         $this->_urlBuilder = $context->getUrlBuilder();
+        $this->_customerFactory = $context->getCustomerFactory();
+        $this->_jsRedirectLoginFactory = $context->getJsRedirectLoginFactory();
         $this->_construct();
     }
 
@@ -133,6 +162,26 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
         }
 
         return $this;
+    }
+
+    /**
+     * Check service is active or not
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->_getConfig('enable');
+    }
+
+    /**
+     * Get sort order of service login
+     *
+     * @return bool
+     */
+    public function getSortOrder()
+    {
+        return $this->_getConfig('sort_order');
     }
 
     /**
@@ -160,11 +209,115 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
     }
 
     /**
+     * Get the provider name
+     *
+     * @return string
+     */
+    abstract public function getProviderName();
+
+    /**
      * Get group config.
      *
      * @return string
      */
     abstract public function getProviderCode();
+
+    /**
+     * Returns the login url for the social network.
+     *
+     * @return string
+     */
+    abstract public function getLoginUrl();
+
+    /**
+     * Handles the login callback from the social network.
+     *
+     * @return SocialUserInterface
+     */
+    abstract public function loginCallback();
+
+    /**
+     * Check is new Customer
+     *
+     * @param SocialUserInterface $socialUserExtracter
+     *
+     * @return bool
+     */
+    protected function _isNewCustomer(
+        \CyberZend\SocialLogin\SocialNetwork\SocialUserInterface $socialUserExtracter
+    ) {
+        /** @var \Magento\Customer\Model\Customer $customer */
+        $customer = $this->_customerFactory->create();
+        $customer->loadByEmail($socialUserExtracter->getEmailAddress());
+
+        return $customer->getId() ? false : true;
+    }
+
+    /**
+     * Create new customer
+     *
+     * @param SocialUserInterface $socialUserExtracter
+     *
+     * @return mixed
+     */
+    protected function _createCustomer(
+        \CyberZend\SocialLogin\SocialNetwork\SocialUserInterface $socialUserExtracter
+    ) {
+        /** @var \Magento\Customer\Model\Customer $customer */
+        $customer = $this->_customerFactory->create([
+            'data' => [
+                'firstname' => $socialUserExtracter->getFirstname(),
+                'lastname' => $socialUserExtracter->getLastname(),
+                'email' => $socialUserExtracter->getEmailAddress(),
+                'website_id' => $this->_storeManager->getStore()->getWebsiteId(),
+                'store_id' => $this->_storeManager->getStore()->getId(),
+            ]
+        ]);
+
+        return $customer->save();
+    }
+
+    /**
+     * @param SocialUserInterface $socialUserExtracter
+     *
+     * @return \CyberZend\SocialLogin\Controller\Result\JsRedirectLogin
+     * @throws \Magento\Framework\Exception\LocalizedExceptio
+     */
+    protected function _processSocialUserExtracter(
+        \CyberZend\SocialLogin\SocialNetwork\SocialUserInterface $socialUserExtracter
+    ) {
+        if($socialUserExtracter->getEmailAddress()) {
+            /** @var \Magento\Customer\Model\Customer $customer */
+            $customer = $this->_customerFactory->create([
+                'data' => [
+                    'website_id' => $this->_storeManager->getStore()->getWebsiteId()
+                ]
+            ]);
+
+            $customer->loadByEmail($socialUserExtracter->getEmailAddress());
+            try {
+                if(!$customer->getId()) {
+                    $customer = $this->_createCustomer($socialUserExtracter);
+                    $customer->sendPasswordReminderEmail();
+                }
+
+                if($customer->getConfirmation()) {
+                    $customer->setConfirmation(null);
+                    $customer->save();
+                }
+
+                $this->_customerSession->setCustomerAsLoggedIn($customer);
+                /** @var \CyberZend\SocialLogin\Controller\Result\JsRedirectLogin $jsRedirectLogin */
+                $jsRedirectLogin = $this->_jsRedirectLoginFactory->create();
+
+                return $jsRedirectLogin->setAfterAuthorLoginUrl($this->_urlBuilder->getUrl('customer/account'));
+            } catch (\Exception $e) {
+                throw new \Magento\Framework\Exception\LocalizedException(__($e->getMessage()), $e);
+            }
+        } else {
+            throw new \Magento\Framework\Exception\LocalizedException(__('Login failed!'));
+        }
+    }
 
     /**
      * Get call back url.
@@ -175,20 +328,20 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
     {
         return $this->_urlBuilder->getUrl(
             'cyberzendsociallogin/index/index',
-            ['provider_code' => $this->getProviderCode()]
+            [self::PARAM_NAME_PROVIDER_CODE => $this->getProviderCode()]
         );
     }
 
     /**
-     * Get config by path
+     * Get config.
      *
-     * @param      $path
-     * @param null $store
+     * @param $field
      *
      * @return mixed
      */
-    protected function _getConfig($field, $store = null)
+    protected function _getConfig($field)
     {
+        $store = $this->_storeManager->getStore()->getId();
         return $this->_scopeConfig->getValue(
             implode('/', [$this->_sectionConfig, $this->getProviderCode(), $field]),
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE,

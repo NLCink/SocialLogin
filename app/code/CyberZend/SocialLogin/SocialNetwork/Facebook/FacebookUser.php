@@ -64,7 +64,7 @@ class FacebookUser extends \Magento\Framework\DataObject implements SocialUserIn
      */
     public function getEmailAddress()
     {
-        return $this->getData('email');
+        return $this->hasData('email') ? $this->getData('email') : $this->getUid() . '@facebook.com';
     }
 
     /**

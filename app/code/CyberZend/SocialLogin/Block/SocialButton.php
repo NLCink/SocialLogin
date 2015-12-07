@@ -11,7 +11,7 @@ class SocialButton extends \Magento\Framework\View\Element\Template
     protected $_template = 'CyberZend_SocialLogin::social-button.phtml';
 
     /**
-     * @var \CyberZend\SocialLogin\SocialNetwork\SocialLoginInterface
+     * @var \CyberZend\SocialLogin\SocialNetwork\AbstractSocialLogin
      */
     protected $_serviceLogin;
 
@@ -41,7 +41,7 @@ class SocialButton extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * @param \CyberZend\SocialLogin\SocialNetwork\SocialLoginInterface $socialService
+     * @param \CyberZend\SocialLogin\SocialNetwork\AbstractSocialLogin $socialService
      *
      * @return SocialButton
      */
@@ -53,7 +53,7 @@ class SocialButton extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * @return \CyberZend\SocialLogin\SocialNetwork\SocialLoginInterface
+     * @return \CyberZend\SocialLogin\SocialNetwork\AbstractSocialLogin
      */
     public function getServiceLogin()
     {

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
   <menu>
-    <add id="CyberZend_SocialLogin::sociallogin" title="SOCIALLOGIN" resource="CyberZend_SocialLogin::sociallogin" module="CyberZend_SocialLogin" sortOrder="100"/>
-    <add id="CyberZend_SocialLogin::menulevel1" title="Menu Level 1" resource="CyberZend_SocialLogin::menulevel1" parent="CyberZend_SocialLogin::sociallogin" action="cyberzendsocialloginadmin" module="CyberZend_SocialLogin" sortOrder="100"/>
+    <add id="CyberZend_SocialLogin::cyberzend" title="CyberZend" resource="CyberZend_SocialLogin::cyberzend" module="CyberZend_SocialLogin" sortOrder="20"/>
+    <add id="CyberZend_SocialLogin::cyberzend_sociallogin" title="Social Login" resource="CyberZend_SocialLogin::cyberzend_sociallogin" parent="CyberZend_SocialLogin::cyberzend" module="CyberZend_SocialLogin" sortOrder="20"/>
+    <add id="CyberZend_SocialLogin::cyberzend_sociallogin_settings" title="Settings" resource="CyberZend_SocialLogin::cyberzend_sociallogin" parent="CyberZend_SocialLogin::cyberzend_sociallogin" action="adminhtml/system_config/edit/section/cyberzend_sociallogin" module="CyberZend_SocialLogin" sortOrder="20"/>
   </menu>
 </config>

@@ -2,4 +2,14 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="CyberZend\SocialLogin\Model\Config\ConfigInterface" type="CyberZend\SocialLogin\Model\Config"/>
+    <type name="Magento\Framework\Controller\ResultFactory">
+        <arguments>
+            <argument name="typeMap" xsi:type="array">
+                <item name="result_type_js_redirect_login" xsi:type="array">
+                    <item name="type" xsi:type="string">js_redirect_login</item>
+                    <item name="class" xsi:type="string">CyberZend\SocialLogin\Controller\Result\JsRedirectLogin</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
 </config>
