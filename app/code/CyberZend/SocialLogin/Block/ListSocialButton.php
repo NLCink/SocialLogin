@@ -50,7 +50,7 @@ class ListSocialButton extends \Magento\Framework\View\Element\Template
      * @return mixed
      */
     public function compareServiceSortOrder($serviceDataA, $serviceDataB) {
-        return $serviceDataA['service_login']->getSortOrder() - $serviceDataB['service_login']->getSortOrder();
+        return $serviceDataA['sort_order'] - $serviceDataB['sort_order'];
     }
 
     /**
@@ -58,12 +58,18 @@ class ListSocialButton extends \Magento\Framework\View\Element\Template
      */
     protected function _prepareServiceData()
     {
+        $this->_listServiceData = [];
+
         foreach ($this->_socialConfig->getServices() as $serviceId => $serviceData) {
             /** @var \CyberZend\SocialLogin\SocialNetwork\AbstractSocialLogin $serviceLogin */
             $serviceLogin = $this->_objectManager->create($serviceData['class_login']);
+
             if($serviceLogin->isActive()) {
-                $serviceData['service_login'] = $serviceLogin->initService();
-                $this->_listServiceData[$serviceId] = $serviceData;
+                $serviceData['login_url'] = $serviceLogin->initService()->getLoginUrl();
+                $serviceData['sort_order'] = $serviceLogin->getSortOrder();
+                if($serviceLogin->isAvailableService()) {
+                    $this->_addService($serviceId, $serviceData);
+                }
             }
         }
         uasort($this->_listServiceData, [$this, "compareServiceSortOrder"]);
@@ -72,12 +78,27 @@ class ListSocialButton extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * @param $serviceId
+     * @param $serviceData
+     *
+     * @return $this
+     */
+    protected function _addService($serviceId, $serviceData)
+    {
+        if(!array_key_exists($serviceId, $this->_listServiceData)) {
+            $this->_listServiceData[$serviceId] = $serviceData;
+        }
+
+        return $this;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function _prepareLayout()
     {
         /** @var \Magento\Customer\Model\Session $customerSession */
-        $customerSession = $this->_objectManager->create('Magento\Customer\Model\Session');
+        $customerSession = $this->_objectManager->get('Magento\Customer\Model\Session');
 
         if($customerSession->isLoggedIn()) {
             return parent::_prepareLayout();

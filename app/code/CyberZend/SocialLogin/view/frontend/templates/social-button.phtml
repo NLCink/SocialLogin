@@ -6,7 +6,7 @@
     "centerScreen": 1,
     "height": 500,
     "width": 500,
-    "windowURL": "<?php echo $block->getServiceLogin()->getLoginUrl() ?>",
+    "windowURL": "<?php echo $block->getLoginUrl() ?>",
     "windowName": "<?php echo $block->getLabel() ?>"
 }}' class="social-button <?php echo $block->getHtmlClass() ?>">
     <img src="<?php echo $block->getViewFileUrl('CyberZend_SocialLogin::images/circle/' . $block->getId() .'-16.png') ?>" alt="<?php echo $block->getTitle() ?>">

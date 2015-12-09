@@ -4,6 +4,7 @@
 namespace CyberZend\SocialLogin\SocialNetwork\Twitter;
 
 use CyberZend\SocialLogin\SocialNetwork\AbstractSocialLogin;
+use Magento\Framework\Exception\LocalizedException;
 
 class TwitterLogin extends AbstractSocialLogin
 {
@@ -33,7 +34,12 @@ class TwitterLogin extends AbstractSocialLogin
      */
     public function getLoginUrl()
     {
-        $token = $this->_socialService->requestRequestToken();
+        try {
+            $token = $this->_socialService->requestRequestToken();
+        } catch (\Exception $e) {
+            $this->setAvailableService(false);
+            return '';
+        }
         return $this->_socialService->getAuthorizationUri(['oauth_token' => $token->getRequestToken()]);
     }
 

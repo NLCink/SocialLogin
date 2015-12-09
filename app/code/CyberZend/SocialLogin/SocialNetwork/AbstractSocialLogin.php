@@ -1,6 +1,7 @@
 <?php
 
 namespace CyberZend\SocialLogin\SocialNetwork;
+use Magento\Framework\Exception\LocalizedException;
 
 abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
 {
@@ -120,6 +121,11 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
     protected $_jsRedirectLoginFactory;
 
     /**
+     * @var bool
+     */
+    protected $_availableService = true;
+
+    /**
      * AbstractSocialLogin constructor.
      *
      * @param Context $context
@@ -191,19 +197,23 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
      */
     public function initService()
     {
-        $storage = $this->_storageSessionFactory->create();
-        $credentials = $this->_credentialsFactory->create([
-            'consumerId' => $this->getConsumerId(),
-            'consumerSecret' => $this->getConsumerSecret(),
-            'callbackUrl' => $this->getCallbackUrl()
-        ]);
+        try {
+            $storage = $this->_storageSessionFactory->create();
+            $credentials = $this->_credentialsFactory->create([
+                'consumerId' => $this->getConsumerId(),
+                'consumerSecret' => $this->getConsumerSecret(),
+                'callbackUrl' => $this->getCallbackUrl()
+            ]);
 
-        $this->_socialService = $this->_socialServiceFactory->createService(
-            $this->getProviderCode(),
-            $credentials,
-            $storage,
-            $this->getOauthScopes()
-        );
+            $this->_socialService = $this->_socialServiceFactory->createService(
+                $this->getProviderCode(),
+                $credentials,
+                $storage,
+                $this->getOauthScopes()
+            );
+        } catch (\Exception $e) {
+            $this->setAvailableService(false);
+        }
 
         return $this;
     }
@@ -235,6 +245,26 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
      * @return SocialUserInterface
      */
     abstract public function loginCallback();
+
+    /**
+     * @param boolean $availableService
+     *
+     * @return AbstractSocialLogin
+     */
+    public function setAvailableService($availableService)
+    {
+        $this->_availableService = $availableService;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isAvailableService()
+    {
+        return $this->_availableService;
+    }
 
     /**
      * Check is new Customer
@@ -271,6 +301,7 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
                 'email' => $socialUserExtracter->getEmailAddress(),
                 'website_id' => $this->_storeManager->getStore()->getWebsiteId(),
                 'store_id' => $this->_storeManager->getStore()->getId(),
+                'password' => 'xinchaocacban'
             ]
         ]);
 
@@ -312,10 +343,10 @@ abstract class AbstractSocialLogin extends \Magento\Framework\DataObject
 
                 return $jsRedirectLogin->setAfterAuthorLoginUrl($this->_urlBuilder->getUrl('customer/account'));
             } catch (\Exception $e) {
-                throw new \Magento\Framework\Exception\LocalizedException(__($e->getMessage()), $e);
+                throw new LocalizedException(__($e->getMessage()), $e);
             }
         } else {
-            throw new \Magento\Framework\Exception\LocalizedException(__('Login failed!'));
+            throw new LocalizedException(__('Login failed!'));
         }
     }
 

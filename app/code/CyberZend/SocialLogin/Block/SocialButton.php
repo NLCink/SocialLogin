@@ -16,6 +16,11 @@ class SocialButton extends \Magento\Framework\View\Element\Template
     protected $_serviceLogin;
 
     /**
+     * @var string
+     */
+    protected $_loginUrl;
+
+    /**
      * Block constructor
      *
      * @param \Magento\Framework\View\Element\Template\Context $context
@@ -29,14 +34,34 @@ class SocialButton extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * @param string $loginUrl
+     *
+     * @return SocialButton
+     */
+    public function setLoginUrl($loginUrl)
+    {
+        $this->_loginUrl = $loginUrl;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLoginUrl()
+    {
+        return $this->_loginUrl;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function _construct()
     {
         parent::_construct();
 
-        if($this->hasData('service_login')) {
-            $this->setServiceLogin($this->getData('service_login'));
+        if($this->hasData('login_url')) {
+            $this->setLoginUrl($this->getData('login_url'));
         }
     }
 
