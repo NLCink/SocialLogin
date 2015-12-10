@@ -4,5 +4,6 @@
         <service id="facebook" htmlClass="facebook" label="Facebook Signin" title="Facebook Signin" classLogin="CyberZend\SocialLogin\SocialNetwork\Facebook\FacebookLogin"/>
         <service id="google" htmlClass="google-plus" label="Google Signin" title="Google Signin" classLogin="CyberZend\SocialLogin\SocialNetwork\Google\GoogleLogin"/>
         <service id="twitter" htmlClass="twitter" label="Twitter Signin" title="Twitter Signin" classLogin="CyberZend\SocialLogin\SocialNetwork\Twitter\TwitterLogin"/>
+        <service id="paypal" htmlClass="paypal" label="Paypal Signin" title="Paypal Signin" classLogin="CyberZend\SocialLogin\SocialNetwork\Paypal\PaypalLogin"/>
     </socialnetwork>
 </config>
